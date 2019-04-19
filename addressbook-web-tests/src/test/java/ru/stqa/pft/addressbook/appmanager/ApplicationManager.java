@@ -1,76 +1,65 @@
 package ru.stqa.pft.addressbook.appmanager;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.BrowserType;
 
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationManager {
 
-  public WebDriver driver;
+  protected WebDriver wd;
 
-  private SessionHelper sessionHelper;
+  private NavigationManager navigationManager;
   private GroupHelper groupHelper;
-  public StringBuffer verificationErrors = new StringBuffer();
-  private String baseUrl;
-  private boolean acceptNextAlert = true;
-  private By by;
+  private SessionHelper sessionHelper;
+  private String browser;
 
+  public ApplicationManager(String browser) {
+    this.browser = browser;
+  }
 
   public void init() {
     System.setProperty("webdriver.gecko.driver", "C:\\xampp\\geckodriver.exe");
-    driver = new FirefoxDriver();
-    baseUrl = "https://www.katalon.com/";
-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-    driver.get("http://localhost/addressbook/group.php");
-    groupHelper = new GroupHelper(driver);
-    sessionHelper = new SessionHelper(driver);
+
+    if (browser.equals(BrowserType.FIREFOX)) {
+      wd = new FirefoxDriver();
+    } else if (browser.equals(BrowserType.CHROME)) {
+      wd = new ChromeDriver();
+    } else if (browser.equals(BrowserType.IE)) {
+      wd = new InternetExplorerDriver();
+    }
+
+    wd.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    wd.get("http://localhost/addressbook/group.php");
+    groupHelper = new GroupHelper(wd);
+    navigationManager = new NavigationManager(wd);
+    sessionHelper = new SessionHelper(wd);
     sessionHelper.login("admin", "secret");
   }
 
-  private void login(String username, String password) {
-    driver.findElement(By.name("user")).click();
-    driver.findElement(By.name("user")).clear();
-    driver.findElement(By.name("user")).sendKeys(username);
-    driver.findElement(By.xpath("//html")).click();
-    driver.findElement(By.name("pass")).click();
-    driver.findElement(By.name("pass")).clear();
-    driver.findElement(By.name("pass")).sendKeys(password);
-    driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Password:'])[1]/following::input[2]")).click();
-  }
-
-  public void stop() {
-    driver.quit();
-  }
-
   private boolean isElementPresent(By by) {
-    this.by = by;
     try {
-      driver.findElement(by);
+      wd.findElement(by);
       return true;
     } catch (NoSuchElementException e) {
       return false;
     }
   }
 
-
-
-  private String closeAlertAndGetItsText() {
-    try {
-      Alert alert = driver.switchTo().alert();
-      String alertText = alert.getText();
-      if (acceptNextAlert) {
-        alert.accept();
-      } else {
-        alert.dismiss();
-      }
-      return alertText;
-    } finally {
-      acceptNextAlert = true;
-    }
-  }
-
   public GroupHelper getGroupHelper() {
     return groupHelper;
+  }
+
+  public NavigationManager getNavigationManager() {
+    return navigationManager;
+  }
+
+  public void stop() {
+
   }
 }
