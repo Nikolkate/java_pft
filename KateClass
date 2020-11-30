@@ -1,3 +1,5 @@
 public class KateTests {
   System.out.printn("My name is Kate");
+  
+  System.out.println("My surname");
 }
