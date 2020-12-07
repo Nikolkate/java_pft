@@ -22,7 +22,19 @@ public class MyFirstProgram {
         System.out.println("Hello, " + somebody + "!");
     }
 
+ @Test
+        void selenideSearchTest() {
+            // Открыть yandex
+            open("https://yandex.ru");
 
+            // Ввести Selenide в поиска
+            $(byName("text")).setValue("Selenide").pressEnter();
+
+            // Проверить, что Selenide появился в результатах поиска
+            $("html").shouldHave(Condition.text("selenide.org"));
+
+
+        }
 
 
 }
